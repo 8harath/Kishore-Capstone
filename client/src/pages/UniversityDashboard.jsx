@@ -11,6 +11,7 @@ const UniversityDashboard = () => {
   const [students, setStudents] = useState([]);
   const [issuedCredentials, setIssuedCredentials] = useState([]);
   const [showIssueForm, setShowIssueForm] = useState(false);
+  const [integrationStatus, setIntegrationStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [issuing, setIssuing] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -38,6 +39,13 @@ const UniversityDashboard = () => {
       ]);
       setStudents(studentsRes.data.data);
       setIssuedCredentials(credentialsRes.data.data);
+
+      try {
+        const integrationRes = await credentialAPI.getIntegrationStatus();
+        setIntegrationStatus(integrationRes.data.data);
+      } catch (integrationError) {
+        console.warn('Integration status unavailable', integrationError);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       setMessage({ type: 'error', text: 'Failed to load data' });
@@ -174,6 +182,15 @@ const UniversityDashboard = () => {
       {message.text && (
         <div className={`alert alert-${message.type}`}>
           {message.text}
+        </div>
+      )}
+
+      {integrationStatus && (!integrationStatus.blockchain || !integrationStatus.ipfs) && (
+        <div className="alert alert-warning">
+          Some integrations are incomplete:
+          {!integrationStatus.blockchain ? ' blockchain' : ''}
+          {!integrationStatus.ipfs ? ' ipfs' : ''}.
+          Issuance may run in partial mode.
         </div>
       )}
 
