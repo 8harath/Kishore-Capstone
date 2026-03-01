@@ -254,10 +254,28 @@ const getStudents = async (req, res) => {
   }
 };
 
+// @desc    Get integration readiness status
+// @route   GET /api/credentials/integrations
+// @access  Private (University only)
+const getIntegrationStatus = async (req, res) => {
+  const hasRpc = Boolean(process.env.SEPOLIA_RPC_URL || process.env.RPC_URL);
+  const hasContract = Boolean(process.env.CONTRACT_ADDRESS);
+  const hasPinata = ipfsService.isConfigured();
+
+  res.status(200).json({
+    success: true,
+    data: {
+      blockchain: hasRpc && hasContract,
+      ipfs: hasPinata
+    }
+  });
+};
+
 module.exports = {
   issueCredential,
   getMyCredentials,
   getCredentialByHash,
   revokeCredential,
-  getStudents
+  getStudents,
+  getIntegrationStatus
 };
